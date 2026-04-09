@@ -3,266 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toán Học Chibi Vui Nhộn</title>
+    <title>Toán Chibi - Firebase Cloud</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
     <style>
         :root {
-            --bg: #f0f7ff;
+            --bg: #fdfdfd;
             --box-num: #FFD54F;
             --correct: #4CAF50;
             --wrong: #F44336;
             --primary: #2196F3;
+            --secondary: #9c27b0;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f0f4f8;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0;
             padding: 20px 10px;
-            min-height: 100vh;
+            margin: 0;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            width: 100%;
-        }
-
-        h2 { color: #2c3e50; margin-bottom: 15px; }
-
-        /* KHUNG CHỨA TOÀN BỘ: CHIBI - BẢNG - CHIBI */
+        .header { text-align: center; margin-bottom: 25px; }
+        
         .main-layout {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             width: 100%;
             max-width: 1300px;
             gap: 20px;
         }
 
-        .chibi-side {
-            width: 180px;
-            flex-shrink: 0;
-            text-align: center;
-        }
-
-        .chibi-side img {
-            width: 100%;
-            height: auto;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
-        }
-
-        .chibi-text {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-            color: #5a67d8;
-            font-size: 14px;
-            background: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        /* KHUNG BẢNG TÍNH */
-        .math-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            flex-grow: 1;
-        }
-
+        .chibi-side { width: 180px; flex-shrink: 0; text-align: center; }
+        .chibi-side img { width: 100%; border-radius: 15px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        
+        .math-container { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; flex-grow: 1; }
+        
         .math-card {
-            background: white;
-            padding: 18px 8px;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-            transition: transform 0.2s;
+            background: white; padding: 15px; border-radius: 15px;
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #eee;
         }
 
-        .math-card:hover { transform: translateY(-3px); }
-
-        .equation {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            width: 100%;
-        }
-
-        .num {
-            font-size: 20px;
-            font-weight: 900;
-            background: var(--box-num);
-            padding: 5px 10px;
-            border-radius: 10px;
-            min-width: 35px;
-            text-align: center;
-            color: #444;
-        }
-
-        .op-sign { font-size: 18px; font-weight: bold; color: #718096; }
-
-        .ans-input {
-            width: 55px;
-            height: 42px;
-            border: 3px solid #edf2f7;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 900;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .ans-input:focus { border-color: var(--primary); }
-
-        .error-msg {
-            font-size: 10px;
-            color: var(--wrong);
-            margin-top: 8px;
-            font-weight: bold;
-            height: 12px;
-            visibility: hidden;
-        }
-
-        /* Trạng thái đúng sai */
+        .num { font-size: 20px; font-weight: 900; background: var(--box-num); padding: 5px 10px; border-radius: 10px; min-width: 32px; text-align: center; }
+        .ans-input { width: 50px; height: 40px; border: 3px solid #eee; border-radius: 10px; text-align: center; font-size: 18px; font-weight: 900; outline: none; }
         .ans-input.correct { border-color: var(--correct); background-color: #f0fff4; }
-        .ans-input.wrong { border-color: var(--wrong); background-color: #fff5f5; animation: shake 0.3s; }
-        .ans-input.wrong + .error-msg { visibility: visible; }
+        .ans-input.wrong { border-color: var(--wrong); background-color: #fff5f5; }
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-4px); }
-            75% { transform: translateX(4px); }
-        }
-
-        .btn-group { margin-top: 30px; display: flex; gap: 15px; }
-
-        button, select {
-            padding: 12px 25px;
-            border-radius: 12px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: opacity 0.2s;
-        }
-
-        button:active { opacity: 0.8; }
+        .btn-group { margin: 30px 0; display: flex; gap: 15px; }
+        button, select { padding: 12px 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-refresh { background: var(--primary); color: white; }
         .btn-check { background: var(--correct); color: white; }
 
-        /* Mobile */
-        @media (max-width: 1100px) {
-            .chibi-side { display: none; } /* Ẩn chibi trên màn hình hẹp để tránh lệch */
-            .math-container { grid-template-columns: repeat(2, 1fr); }
+        /* PHẦN LỊCH SỬ CLOUD */
+        .history-section {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        @media (max-width: 500px) {
-            .math-container { grid-template-columns: 1fr; }
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+        .status-cloud { color: #2196F3; font-size: 12px; font-weight: normal; float: right; }
+
+        @media (max-width: 1100px) { .chibi-side { display: none; } .math-container { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .math-container { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>✨ Bé Tập Làm Toán ✨</h2>
+        <h2>🚀 Bé Học Toán (Dữ liệu đám mây)</h2>
         <select id="math-type" onchange="generateMath()">
-            <option value="kid5">Bé 5 tuổi (Phạm vi 10)</option>
+            <option value="kid5">Bé 5 tuổi</option>
             <option value="no-carry">Lớp 1 - Không nhớ</option>
-            <option value="carry" selected>Lớp 1 - Có nhớ (Khó)</option>
+            <option value="carry" selected>Lớp 1 - Có nhớ</option>
         </select>
     </div>
 
     <div class="main-layout">
         <div class="chibi-side">
-            <img src="https://i.ibb.co/TB3TPsD5/anh3.png" alt="Boy Chibi">
-            <span class="chibi-text">Cùng học nào!</span>
+            <img src="https://i.ibb.co/TB3TPsD5/anh3.png">
         </div>
 
         <div class="math-container" id="container"></div>
 
         <div class="chibi-side">
-            <img src="https://i.ibb.co/wZ9Yz65T/anh2.png" alt="Girl Chibi">
-            <span class="chibi-text">Bé giỏi quá!</span>
+            <img src="https://i.ibb.co/wZ9Yz65T/anh2.png">
         </div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-refresh" onclick="generateMath()">🔄 Đổi bài mới</button>
-        <button class="btn-check" onclick="checkResults()">✅ Kiểm tra bài</button>
+        <button class="btn-refresh" onclick="generateMath()">🔄 Đổi bài</button>
+        <button class="btn-check" onclick="checkAndUpload()">✅ Nộp bài & Lưu Cloud</button>
+    </div>
+
+    <div class="history-section">
+        <h3 style="color: var(--secondary)">☁️ Lịch sử làm bài trên Firebase <span class="status-cloud" id="sync-status">Đang đồng bộ...</span></h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ngày/Giờ</th>
+                    <th>Cấp độ</th>
+                    <th>Điểm số</th>
+                    <th>Xếp loại</th>
+                </tr>
+            </thead>
+            <tbody id="history-body"></tbody>
+        </table>
     </div>
 
     <script>
+        // --- 1. CẤU HÌNH FIREBASE (THAY THÔNG TIN CỦA BẠN VÀO ĐÂY) ---
+       const firebaseConfig = {
+  apiKey: "AIzaSyAWBs-QTOaRpylR3ysfKvYvIO38VJpNbKk",
+  authDomain: "toan-bibon.firebaseapp.com",
+  projectId: "toan-bibon",
+  storageBucket: "toan-bibon.firebasestorage.app",
+  messagingSenderId: "14060225460",
+  appId: "1:14060225460:web:d04073d113e7076f3828e1"
+};
+
+        // Khởi tạo Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- 2. LOGIC TOÁN HỌC ---
         function generateMath() {
             const type = document.getElementById('math-type').value;
             const container = document.getElementById('container');
             container.innerHTML = "";
-
             for (let i = 0; i < 20; i++) {
-                let n1, n2, opSign, result;
-
+                let n1, n2, op;
                 if (type === "kid5") {
                     n1 = Math.floor(Math.random() * 9) + 1;
-                    opSign = Math.random() > 0.5 ? '+' : '-';
-                    n2 = (opSign === '+') ? Math.floor(Math.random() * (10 - n1 + 1)) : Math.floor(Math.random() * (n1 + 1));
-                } else if (type === "no-carry") {
-                    n1 = Math.floor(Math.random() * 60) + 10;
-                    opSign = Math.random() > 0.5 ? '+' : '-';
-                    let d1 = n1 % 10;
-                    n2 = (opSign === '+') ? Math.floor(Math.random() * (9 - d1 + 1)) : Math.floor(Math.random() * (d1 + 1));
+                    op = Math.random() > 0.5 ? '+' : '-';
+                    n2 = op === '+' ? Math.floor(Math.random() * (10 - n1 + 1)) : Math.floor(Math.random() * (n1 + 1));
                 } else {
-                    opSign = Math.random() > 0.5 ? '+' : '-';
-                    if (opSign === '+') {
-                        n1 = Math.floor(Math.random() * 30) + 9;
-                        let d1 = n1 % 10;
-                        n2 = Math.floor(Math.random() * 8) + (10 - d1);
-                    } else {
-                        n1 = Math.floor(Math.random() * 30) + 11;
-                        let d1 = n1 % 10;
-                        n2 = Math.floor(Math.random() * 9) + 1;
-                        if (n2 <= d1) n2 = d1 + 1;
-                    }
+                    n1 = Math.floor(Math.random() * 50) + 10;
+                    op = Math.random() > 0.5 ? '+' : '-';
+                    n2 = Math.floor(Math.random() * 9) + 1;
                 }
-
-                result = (opSign === '+') ? n1 + n2 : n1 - n2;
-
+                let res = op === '+' ? n1 + n2 : n1 - n2;
                 container.innerHTML += `
                     <div class="math-card">
-                        <div class="equation">
-                            <span class="num">${n1}</span>
-                            <span class="op-sign">${opSign}</span>
-                            <span class="num">${n2}</span>
-                            <span class="op-sign">=</span>
-                            <input type="number" class="ans-input" data-ans="${result}">
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span class="num">${n1}</span> <b>${op}</b> <span class="num">${n2}</span> <b>=</b>
+                            <input type="number" class="ans-input" data-ans="${res}">
                         </div>
-                        <div class="error-msg">Sửa lại nhé! ❌</div>
-                    </div>
-                `;
+                    </div>`;
             }
         }
 
-        function checkResults() {
-            document.querySelectorAll('.ans-input').forEach(input => {
-                const val = input.value;
-                const ans = input.dataset.ans;
-                input.classList.remove('correct', 'wrong');
-                if (val !== "") {
-                    if (parseInt(val) === parseInt(ans)) {
-                        input.classList.add('correct');
-                    } else {
-                        input.classList.add('wrong');
-                    }
+        // --- 3. LƯU DỮ LIỆU LÊN FIREBASE ---
+        function checkAndUpload() {
+            let correct = 0;
+            const inputs = document.querySelectorAll('.ans-input');
+            inputs.forEach(input => {
+                if (parseInt(input.value) === parseInt(input.dataset.ans)) {
+                    input.classList.add('correct'); correct++;
+                } else {
+                    input.classList.add('wrong');
                 }
             });
+
+            const typeText = document.getElementById('math-type').selectedOptions[0].text;
+            const now = new Date();
+            const timeStr = now.toLocaleString('vi-VN');
+
+            const record = {
+                timestamp: Date.now(),
+                time: timeStr,
+                level: typeText,
+                score: `${correct}/20`,
+                rank: correct === 20 ? "Xuất sắc! 🏆" : (correct >= 15 ? "Giỏi! 👍" : "Cố lên 💪")
+            };
+
+            // Đẩy lên Firebase
+            database.ref('history').push(record)
+                .then(() => alert("Đã lưu kết quả lên Cloud!"))
+                .catch(err => console.error("Lỗi lưu Cloud: ", err));
         }
+
+        // --- 4. LẤY DỮ LIỆU TỪ FIREBASE ---
+        database.ref('history').orderByChild('timestamp').limitToLast(10).on('value', (snapshot) => {
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = "";
+            const data = [];
+            snapshot.forEach(child => { data.push(child.val()); });
+            data.reverse().forEach(h => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${h.time}</td>
+                        <td>${h.level}</td>
+                        <td style="font-weight:bold; color:#4CAF50">${h.score}</td>
+                        <td>${h.rank}</td>
+                    </tr>`;
+            });
+            document.getElementById('sync-status').innerText = "☁️ Đã đồng bộ";
+        });
 
         window.onload = generateMath;
     </script>
