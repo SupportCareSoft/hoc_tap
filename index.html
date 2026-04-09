@@ -122,14 +122,15 @@
 
     <script>
         // --- 1. CẤU HÌNH FIREBASE (THAY THÔNG TIN CỦA BẠN VÀO ĐÂY) ---
-       const firebaseConfig = {
-  apiKey: "AIzaSyAWBs-QTOaRpylR3ysfKvYvIO38VJpNbKk",
-  authDomain: "toan-bibon.firebaseapp.com",
-  projectId: "toan-bibon",
-  storageBucket: "toan-bibon.firebasestorage.app",
-  messagingSenderId: "14060225460",
-  appId: "1:14060225460:web:d04073d113e7076f3828e1"
-};
+            const firebaseConfig = {
+            apiKey: "AIzaSyAWBs-QTOaRpylR3ysfKvYvIO38VJpNbKk",
+            authDomain: "toan-bibon.firebaseapp.com",
+            databaseURL: "https://toan-bibon-default-rtdb.firebaseio.com",
+            projectId: "toan-bibon",
+            storageBucket: "toan-bibon.firebasestorage.app",
+            messagingSenderId: "14060225460",
+            appId: "1:14060225460:web:d04073d113e7076f3828e1"
+        };
 
         // Khởi tạo Firebase
         firebase.initializeApp(firebaseConfig);
